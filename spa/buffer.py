@@ -2,9 +2,12 @@ import module
 import numpy as np
 
 class Buffer(module.Module):
-    def init(self, dimensions=16, N_per_D=30, feedback=1, pstc_feedback=0.01, array_dimensions=None, intercept=None):
+    def init(self, vocab, N_per_D=30, feedback=1, pstc_feedback=0.01, array_dimensions=None, intercept=None):
         if intercept is None: intercept=(-1,1)
         else: intercept=(intercept,1)
+        
+        dimensions = vocab.dimensions
+        
         if array_dimensions is None:
             self.net.make('buffer', N_per_D*dimensions, dimensions, intercept=intercept)
         else:
@@ -13,8 +16,8 @@ class Buffer(module.Module):
         if feedback!=0:
             self.net.connect('buffer','buffer',weight=feedback, pstc=pstc_feedback)                    
 
-        self.spa.add_source(self, 'buffer')        
-        self.spa.add_sink(self, 'buffer')
+        self.spa.add_source(self, 'buffer', vocab)        
+        self.spa.add_sink(self, 'buffer', vocab)
         
     """        
     def complete(self, recurrent_cleanup=0):

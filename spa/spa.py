@@ -1,18 +1,16 @@
-import hrr
+import vocab
 
 import module
 
 import inspect
 
 class SPA:
-    randomize_vectors=True
     verbose=False
 
     def __init__(self,network):
         self.net=network
         self.params={}
         self.modules={}
-        self.vocabs={}
         self.sinks={}
         self.sources={}
         self.init()
@@ -25,7 +23,7 @@ class SPA:
             if not k.startswith('_'):
                 if isinstance(v,module.Module):
                     modules.append((k,v))
-                elif isinstance(v,(int,float,str)):
+                elif isinstance(v,(int,float,str, vocab.Vocabulary)):
                     self.params[k]=v
         for k,v in modules:        
             if self.verbose: print 'Initializing module:',k            
@@ -69,36 +67,20 @@ class SPA:
         raise KeyError('No parameter %s found in %s'%(param, module))
         
         
-    def add_sink(self, module, node, name=None, vocab=None):
+    def add_sink(self, module, node, vocab, name=None):
         module_name = self.get_module_name(module)
         if name is None: 
             name = module_name
         else:
             name = module_name+'_'+name    
-        if vocab is None:
-            dims = self.get_param_value('dimensions', module)
-            rand = self.get_param_value('randomize_vectors', module)
-            key=(dims, rand)
-            vocab=self.vocabs.get(key, None)
-            if vocab is None:
-                vocab=hrr.Vocabulary(dims, randomize=rand)
-                self.vocabs[key]=vocab
         alias='sink_%s'%name
         self.net.set_alias(alias, '%s.%s'%(module_name, node))
         self.sinks[name]=vocab
 
-    def add_source(self, module, node, name=None, vocab=None):
+    def add_source(self, module, node, vocab, name=None):
         module_name = self.get_module_name(module)
         if name is None: 
             name = module_name
-        if vocab is None:
-            dims = self.get_param_value('dimensions', module)
-            rand = self.get_param_value('randomize_vectors', module)
-            key=(dims, rand)
-            vocab=self.vocabs.get(key, None)
-            if vocab is None:
-                vocab=hrr.Vocabulary(dims, randomize=rand)
-                self.vocabs[key]=vocab
         alias='source_%s'%name
         self.net.set_alias(alias, '%s.%s'%(module_name, node))
         self.sources[name]=vocab

@@ -62,23 +62,24 @@ class Rule:
     def __init__(self,func,spa):
         self.func=func
         self.name=func.func_name
-        args,varargs,keywords,defaults=inspect.getargspec(func)
-        if defaults is None or args is None or len(args)!=len(defaults):
-            raise Exception('No value specified for match in rule '+self.name)
+        #args,varargs,keywords,defaults=inspect.getargspec(func)
+        #if defaults is None or args is None or len(args)!=len(defaults):
+        #    raise Exception('No value specified for match in rule '+self.name)
         self.scale=1.0
+        self.spa = spa
 
         globals={}
 
         self.lhs={}
-        for i in range(len(args)):
-            if args[i]=='scale':
-                self.scale=defaults[i]
-            elif callable(defaults[i]):
-                globals[args[i]] = defaults[i]
-            else:
-                if args[i] not in spa.sources.keys():
-                    print 'Warning: unknown source "%s" in rule %s'%(args[i],self.name)
-                self.lhs[args[i]]=defaults[i]
+        #for i in range(len(args)):
+        #    if args[i]=='scale':
+        #        self.scale=defaults[i]
+        #    elif callable(defaults[i]):
+        #        globals[args[i]] = defaults[i]
+        #    else:
+        #        if args[i] not in spa.sources.keys():
+        #            print 'Warning: unknown source "%s" in rule %s'%(args[i],self.name)
+        #        self.lhs[args[i]]=defaults[i]
 
         self.rhs_direct={}
         self.rhs_route={}
@@ -92,6 +93,7 @@ class Rule:
             if k not in globals.keys():
                 globals[k]=Sink(k)
         globals['effect']=self.effect
+        globals['condition']=self.condition
         globals['match']=self.match
         globals['learn']=self.learn
         
@@ -101,6 +103,26 @@ class Rule:
         production = compile(code,'<production-%s>'%self.name,'exec')
         
         eval(production, globals)
+
+        if len(self.lhs)==0:
+            raise Exception('No conditions specified for rule '+self.name)
+
+
+
+    def condition(self, **args):
+        for k,v in args.items():
+            if k not in self.spa.sources.keys():
+                if k=='scale':
+                    self.scale = v
+                else:    
+                    print 'Warning: unknown source "%s" in rule %s'%(k,self.name)
+            else:    
+                if isinstance(v, Sink):
+                    self.lhs_match[k, v.name] = v.weight
+                else:    
+                    self.lhs[k] = v
+            
+        
 
     def effect(self,**args):
         for k,v in args.items():

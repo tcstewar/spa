@@ -6,3 +6,5 @@ from bg import BasalGanglia
 from thalamus import Thalamus
 from flow import Flow
 from cleanup import Cleanup
+from pointer import SemanticPointer
+from vocab import Vocabulary
