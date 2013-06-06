@@ -104,7 +104,7 @@ class Rule:
         
         eval(production, globals)
 
-        if len(self.lhs)==0:
+        if len(self.lhs)==0 and len(self.lhs_match)==0:
             raise Exception('No conditions specified for rule '+self.name)
 
 

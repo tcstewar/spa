@@ -1,4 +1,4 @@
-import nengo.nef_theano as nef
+import nengo_theano as nef
 import spa
 
 class Rules:

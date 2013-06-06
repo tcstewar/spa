@@ -51,7 +51,8 @@ class Thalamus(module.Module):
             vocab1=self.spa.sources[source]
             vocab2=self.spa.sinks[sink]
             
-            self.net.make(cname, channel_N_per_D*vocab2.dimensions, vocab2.dimensions)
+            N_channel = channel_N_per_D*vocab2.dimensions            
+            self.net.make(cname, N_channel, vocab2.dimensions)
             
             if vocab1 is vocab2: 
                 transform=None            
@@ -67,6 +68,7 @@ class Thalamus(module.Module):
             self.spa.net.connect(self.name+'.'+cname, 'sink_'+sink, pstc=pstc_channel, transform=transform2)
             
         
-            self.net.connect(gname, cname, encoders=-10, pstc=pstc_gate)
+            self.net.connect(gname, cname, transform=[[-10]]*N_channel, pstc=pstc_gate)
+            #self.net.connect(gname, cname, encoders=-10, pstc=pstc_gate)
 
 
